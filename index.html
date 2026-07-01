@@ -330,6 +330,41 @@
             </section>
         </div>
 
+
+        <section id="currencyConverter" class="mt-4 md:mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 md:p-6 shadow-xl transition-colors dark:border-zinc-700 dark:bg-[#26262b] dark:shadow-none">
+            <h2 class="mb-4 text-base md:text-lg font-bold text-slate-700 dark:text-zinc-200">汇率转换器</h2>
+            <div class="space-y-4">
+                <div class="group">
+                    <label for="converterFrom" class="mb-1.5 block text-sm font-bold text-slate-500 transition-colors group-focus-within:text-emerald-600 dark:text-zinc-500 dark:group-focus-within:text-emerald-400">源货币</label>
+                    <div class="relative">
+                        <select id="converterFrom" class="select-centered w-full h-14 appearance-none rounded-xl border border-slate-300 bg-white px-4 pr-10 text-lg font-medium text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-[#1d1d22] dark:text-zinc-100 dark:focus:border-emerald-500"></select>
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-zinc-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <label for="converterAmount" class="mb-1.5 block text-sm font-bold text-slate-500 transition-colors group-focus-within:text-emerald-600 dark:text-zinc-500 dark:group-focus-within:text-emerald-400">输入金额</label>
+                    <input id="converterAmount" type="number" step="0.01" inputmode="decimal" value="8" class="w-full h-14 rounded-xl border border-slate-300 bg-white px-4 text-lg font-medium tabular-nums text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-[#1d1d22] dark:text-zinc-100 dark:focus:border-emerald-500" placeholder="0.00">
+                </div>
+
+                <div class="group">
+                    <label for="converterTo" class="mb-1.5 block text-sm font-bold text-slate-500 transition-colors group-focus-within:text-emerald-600 dark:text-zinc-500 dark:group-focus-within:text-emerald-400">目标货币</label>
+                    <div class="relative">
+                        <select id="converterTo" class="select-centered w-full h-14 appearance-none rounded-xl border border-slate-300 bg-white px-4 pr-10 text-lg font-medium text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-[#1d1d22] dark:text-zinc-100 dark:focus:border-emerald-500"></select>
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-zinc-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="converterRate" class="rounded-xl border border-sky-200 bg-sky-100/80 px-4 py-3 text-base font-bold text-sky-700 transition-colors dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-300">汇率: --</div>
+                <button id="converterBtn" type="button" class="w-full rounded-xl bg-emerald-500 px-4 py-3.5 text-lg font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-600 active:translate-y-px dark:bg-emerald-600 dark:hover:bg-emerald-500">立即转换</button>
+                <div id="converterResult" class="min-h-16 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-base font-medium tabular-nums text-emerald-700 transition-colors dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">--</div>
+            </div>
+        </section>
+
         <div id="footerWrap" class="mt-2 text-center">
             <span class="text-[10px] md:text-[13px] text-slate-400 dark:text-zinc-600 font-medium tabular-nums transition-colors"><a href="https://github.com/verkyer/vps-jsq" target="_blank" class="hover:text-amber-500 transition-colors">VPS-JSQ</a> v1.3.9 / <a href="https://www.xiaoge.org/" target="_blank" class="hover:text-amber-500 transition-colors">@XiaoGe</a>.</span>
         </div>

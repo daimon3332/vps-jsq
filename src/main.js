@@ -30,6 +30,14 @@ const currencySymbols = {
     'KRW': '\u20A9', 'TWD': 'NT$', 'CAD': 'C$'
 };
 
+const converterCurrencies = [
+    ['USD', '美元'], ['CNY', '人民币'], ['EUR', '欧元'], ['GBP', '英镑'],
+    ['JPY', '日元'], ['SGD', '新加坡元'], ['HKD', '港币'], ['CAD', '加拿大元'],
+    ['AUD', '澳大利亚元'], ['KRW', '韩元'], ['TWD', '新台币'], ['VND', '越南盾'],
+    ['RUB', '俄罗斯卢布'], ['MMK', '缅甸元'], ['CHF', '瑞士法郎'], ['INR', '印度卢比'],
+    ['PKR', '巴基斯坦卢比']
+];
+
 const els = {
     price: document.getElementById('price'),
     currency: document.getElementById('currency'),
@@ -56,6 +64,15 @@ const els = {
     themeToggleKnob: document.getElementById('themeToggleKnob')
 };
 
+const converterEls = {
+    from: document.getElementById('converterFrom'),
+    amount: document.getElementById('converterAmount'),
+    to: document.getElementById('converterTo'),
+    rate: document.getElementById('converterRate'),
+    button: document.getElementById('converterBtn'),
+    result: document.getElementById('converterResult')
+};
+
 let rateLimitTimer = null;
 let remainingValueCNY = 0;
 let quoteLastEdited = 'premium';
@@ -69,6 +86,7 @@ window.addEventListener('DOMContentLoaded', () => {
         syncDateDisplay(els.dueDate);
         syncDateDisplay(els.tradeDate);
         initRates(); 
+        initCurrencyConverter();
         setupEventListeners();
         calculate(); 
     } finally {
@@ -114,6 +132,14 @@ function setupEventListeners() {
     });
 
     els.refreshBtn.addEventListener('click', manualRefreshRate); 
+    converterEls.from.addEventListener('change', updateCurrencyConverter);
+    converterEls.to.addEventListener('change', updateCurrencyConverter);
+    converterEls.amount.addEventListener('input', () => {
+        validateNumberInput(converterEls.amount);
+        convertCurrency();
+    });
+    converterEls.button.addEventListener('click', convertCurrency);
+    validateNumberInput(converterEls.amount);
     els.themeToggle.addEventListener('click', toggleTheme);
     els.finalValue.addEventListener('click', copyFinalValueAmount);
     els.finalValue.addEventListener('keydown', (e) => {
@@ -200,6 +226,87 @@ function validateNumberInput(el) {
     const ok = Number.isFinite(v) && v >= 0;
     el.classList.toggle('input-invalid', !ok);
     return ok;
+}
+
+function initCurrencyConverter() {
+    const options = converterCurrencies
+        .map(([code, name]) => `<option value="${code}">${name} (${code})</option>`)
+        .join('');
+    converterEls.from.innerHTML = options;
+    converterEls.to.innerHTML = options;
+    converterEls.from.value = 'USD';
+    converterEls.to.value = 'CNY';
+    updateCurrencyConverter();
+}
+
+async function updateCurrencyConverter() {
+    const rate = await getConverterRate(converterEls.from.value, converterEls.to.value);
+    if (!Number.isFinite(rate)) {
+        converterEls.rate.textContent = '汇率: 获取失败';
+        converterEls.result.textContent = '--';
+        return;
+    }
+    converterEls.rate.textContent = `汇率: 1 ${converterEls.from.value} = ${formatRate(rate)} ${converterEls.to.value}`;
+    convertCurrency(rate);
+}
+
+async function convertCurrency(knownRate) {
+    const amount = parseFloat(converterEls.amount.value);
+    if (!Number.isFinite(amount) || amount < 0) {
+        converterEls.result.textContent = '--';
+        return;
+    }
+
+    const rate = Number.isFinite(knownRate)
+        ? knownRate
+        : await getConverterRate(converterEls.from.value, converterEls.to.value);
+    if (!Number.isFinite(rate)) {
+        converterEls.result.textContent = '--';
+        return;
+    }
+
+    const result = amount * rate;
+    converterEls.result.textContent = `${formatAmount(amount)} ${converterEls.from.value} = ${result.toFixed(2)} ${converterEls.to.value}`;
+}
+
+async function getConverterRate(from, to) {
+    if (from === to) return 1;
+    const rates = await getConverterRates();
+    if (!rates || typeof rates[from] !== 'number' || typeof rates[to] !== 'number') return NaN;
+    return rates[to] / rates[from];
+}
+
+async function getConverterRates() {
+    const cacheKey = 'vps_converter_rates';
+    const cached = getCookie(cacheKey);
+    if (cached) {
+        try {
+            const rates = JSON.parse(cached);
+            rates.CNY = 1;
+            return rates;
+        } catch (e) {}
+    }
+
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        if (data.result !== 'success' || !data.rates) throw new Error('API Error');
+        data.rates.CNY = 1;
+        setCookie(cacheKey, JSON.stringify(data.rates), RATE_CACHE_HOURS);
+        return data.rates;
+    } catch (error) {
+        console.error(error);
+        showToast('获取汇率失败');
+        return null;
+    }
+}
+
+function formatRate(value) {
+    return value >= 100 ? value.toFixed(2) : Number(value.toFixed(4)).toString();
+}
+
+function formatAmount(value) {
+    return Number.isInteger(value) ? value.toString() : value.toFixed(2);
 }
 
 function initQuoteFields() {
