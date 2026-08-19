@@ -38,6 +38,77 @@ const converterCurrencies = [
     ['PKR', '巴基斯坦卢比']
 ];
 
+const additionalCurrencyCodes = [
+    'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT',
+    'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD',
+    'CDF', 'CLP', 'COP', 'CRC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP',
+    'ERN', 'ETB', 'FJD', 'FKP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HNL',
+    'HRK', 'HTG', 'HUF', 'IDR', 'ILS', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'KES', 'KGS',
+    'KHR', 'KMF', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD',
+    'MDL', 'MGA', 'MKD', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN',
+    'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PLN',
+    'PYG', 'QAR', 'RON', 'RSD', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SHP', 'SLE',
+    'SOS', 'SRD', 'SSP', 'STN', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY',
+    'TTD', 'TZS', 'UAH', 'UGX', 'UYU', 'UZS', 'VES', 'VUV', 'WST', 'XAF', 'XCD', 'XOF',
+    'XPF', 'YER', 'ZAR', 'ZMW', 'ZWL'
+];
+
+const currencyFallbackNames = {
+    AED: '阿联酋迪拉姆', AFN: '阿富汗尼', ALL: '阿尔巴尼亚列克', AMD: '亚美尼亚德拉姆',
+    ARS: '阿根廷比索', BRL: '巴西雷亚尔', CHF: '瑞士法郎', CLP: '智利比索', COP: '哥伦比亚比索',
+    CZK: '捷克克朗', DKK: '丹麦克朗', EGP: '埃及镑', HUF: '匈牙利福林', IDR: '印尼盾',
+    ILS: '以色列新谢克尔', INR: '印度卢比', ISK: '冰岛克朗', KES: '肯尼亚先令', KWD: '科威特第纳尔',
+    MXN: '墨西哥比索', MYR: '马来西亚林吉特', NOK: '挪威克朗', NZD: '新西兰元', PLN: '波兰兹罗提',
+    QAR: '卡塔尔里亚尔', RON: '罗马尼亚列伊', SAR: '沙特里亚尔', SEK: '瑞典克朗', THB: '泰铢',
+    TRY: '土耳其里拉', UAH: '乌克兰格里夫纳', ZAR: '南非兰特'
+};
+
+const currencyCodes = [...new Set([
+    ...converterCurrencies.map(([code]) => code),
+    ...additionalCurrencyCodes
+])];
+const popularCurrencyCodes = converterCurrencies.map(([code]) => code);
+const currencyNameFormatter = typeof Intl !== 'undefined' && Intl.DisplayNames
+    ? new Intl.DisplayNames(['zh-CN'], { type: 'currency' })
+    : null;
+
+function getCurrencyName(code) {
+    if (currencyFallbackNames[code]) return currencyFallbackNames[code];
+    try {
+        return currencyNameFormatter?.of(code) || code;
+    } catch (error) {
+        return code;
+    }
+}
+
+const currencyRegionOverrides = {
+    ANG: 'CW', EUR: 'EU', XAF: 'CM', XCD: 'AG', XOF: 'SN', XPF: 'PF'
+};
+const flagAssets = import.meta.glob('../node_modules/flag-icons/flags/1x1/{ae,af,ag,al,am,ao,ar,au,aw,az,ba,bb,bd,bg,bh,bi,bm,bn,bo,br,bs,bt,bw,by,bz,ca,cd,ch,cl,cm,cn,co,cr,cu,cv,cw,cz,dj,dk,do,dz,eg,er,et,eu,fj,fk,gb,ge,gh,gi,gm,gn,gt,gy,hk,hn,hr,ht,hu,id,il,in,iq,ir,is,jm,jo,jp,ke,kg,kh,km,kr,kw,ky,kz,la,lb,lk,lr,ls,ly,ma,md,mg,mk,mm,mn,mo,mr,mu,mv,mw,mx,my,mz,na,ng,ni,no,np,nz,om,pa,pe,pf,pg,ph,pk,pl,py,qa,ro,rs,ru,rw,sa,sb,sc,sd,se,sg,sh,sl,sn,so,sr,ss,st,sy,sz,th,tj,tm,tn,to,tr,tt,tw,tz,ua,ug,us,uy,uz,ve,vn,vu,ws,ye,za,zm,zw}.svg', {
+    eager: true,
+    query: '?url',
+    import: 'default'
+});
+const currencyFlagAssets = Object.fromEntries(Object.entries(flagAssets).map(([path, url]) => [
+    path.match(/([^/]+)\.svg$/)?.[1],
+    url
+]));
+
+function getCurrencyRegion(code) {
+    const region = currencyRegionOverrides[code] || code.slice(0, 2);
+    return /^[A-Z]{2}$/.test(region) ? region.toLocaleLowerCase() : '';
+}
+
+function getCurrencyFlagUrl(code) {
+    return currencyFlagAssets[getCurrencyRegion(code)] || '';
+}
+
+const currencyDirectory = currencyCodes.map(code => ({
+    code,
+    name: getCurrencyName(code),
+    popular: popularCurrencyCodes.includes(code)
+}));
+
 const els = {
     price: document.getElementById('price'),
     currency: document.getElementById('currency'),
@@ -69,6 +140,7 @@ const converterEls = {
     amount: document.getElementById('converterAmount'),
     to: document.getElementById('converterTo'),
     rate: document.getElementById('converterRate'),
+    swap: document.getElementById('converterSwapBtn'),
     button: document.getElementById('converterBtn'),
     result: document.getElementById('converterResult')
 };
@@ -80,13 +152,13 @@ let quoteLastEdited = 'premium';
 window.addEventListener('DOMContentLoaded', () => {
     try {
         initTheme();
-        loadInputsFromCookie(); 
+        initCurrencyConverter();
+        loadInputsFromCookie();
         initQuoteFields();
         initDates(); 
         syncDateDisplay(els.dueDate);
         syncDateDisplay(els.tradeDate);
         initRates(); 
-        initCurrencyConverter();
         setupEventListeners();
         calculate(); 
     } finally {
@@ -134,6 +206,7 @@ function setupEventListeners() {
     els.refreshBtn.addEventListener('click', manualRefreshRate); 
     converterEls.from.addEventListener('change', updateCurrencyConverter);
     converterEls.to.addEventListener('change', updateCurrencyConverter);
+    converterEls.swap.addEventListener('click', swapConverterCurrencies);
     converterEls.amount.addEventListener('input', () => {
         validateNumberInput(converterEls.amount);
         convertCurrency();
@@ -229,13 +302,195 @@ function validateNumberInput(el) {
 }
 
 function initCurrencyConverter() {
-    const options = converterCurrencies
-        .map(([code, name]) => `<option value="${code}">${name} (${code})</option>`)
+    const options = currencyDirectory
+        .map(({ code, name }) => `<option value="${code}">${name} (${code})</option>`)
         .join('');
-    converterEls.from.innerHTML = options;
-    converterEls.to.innerHTML = options;
-    converterEls.from.value = 'USD';
-    converterEls.to.value = 'CNY';
+
+    [els.currency, converterEls.from, converterEls.to].forEach(select => {
+        const previousValue = select.value;
+        select.innerHTML = options;
+        if (currencyCodes.includes(previousValue)) select.value = previousValue;
+        if (select === converterEls.from && !previousValue) select.value = 'USD';
+        if (select === converterEls.to && !previousValue) select.value = 'CNY';
+    });
+
+    createCurrencyPicker(els.currency);
+    createCurrencyPicker(converterEls.from);
+    createCurrencyPicker(converterEls.to);
+    updateCurrencySymbol();
+    updateCurrencyConverter();
+}
+
+function createCurrencyPicker(select) {
+    const parent = select.parentElement;
+    if (!parent || parent.querySelector('.currency-picker-trigger')) return;
+
+    parent.classList.add('currency-picker');
+    select.classList.add('currency-native-select');
+    select.setAttribute('aria-hidden', 'true');
+    select.tabIndex = -1;
+    const oldArrow = select.nextElementSibling;
+    if (oldArrow?.querySelector('svg')) oldArrow.remove();
+
+    const pickerId = `${select.id}-picker`;
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.id = `${pickerId}-trigger`;
+    trigger.className = 'currency-picker-trigger';
+    trigger.setAttribute('role', 'combobox');
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-controls', `${pickerId}-menu`);
+    trigger.setAttribute('aria-label', select.getAttribute('aria-label') || select.previousElementSibling?.textContent?.trim() || '选择货币');
+    document.querySelector(`label[for="${select.id}"]`)?.setAttribute('for', trigger.id);
+
+    const panel = document.createElement('div');
+    panel.id = `${pickerId}-menu`;
+    panel.className = 'currency-picker-panel';
+    panel.hidden = true;
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', '搜索货币');
+    panel.innerHTML = `
+        <div class="currency-picker-search-wrap">
+            <svg class="currency-picker-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+                <path d="m20 20-4-4" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <input type="search" class="currency-picker-search" placeholder="搜索货币..." autocomplete="off" aria-label="搜索货币" role="combobox" aria-expanded="true" aria-controls="${pickerId}-list">
+        </div>
+        <div id="${pickerId}-list" class="currency-picker-list" role="listbox" tabindex="-1"></div>`;
+
+    parent.insertBefore(trigger, select);
+    parent.appendChild(panel);
+    const search = panel.querySelector('.currency-picker-search');
+    const list = panel.querySelector('.currency-picker-list');
+
+    const updateTrigger = () => {
+        const currency = currencyDirectory.find(item => item.code === select.value) || currencyDirectory[0];
+        trigger.innerHTML = `<span class="currency-picker-flag" style="background-image:url('${getCurrencyFlagUrl(currency.code)}')" aria-hidden="true"></span><span class="currency-picker-code">${currency.code}</span><span class="currency-picker-name">${currency.name}</span><svg class="currency-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+        trigger.setAttribute('aria-label', `${currency.code} ${currency.name}`);
+    };
+
+    const close = (restoreFocus = false) => {
+        panel.hidden = true;
+        parent.classList.remove('is-open', 'opens-up');
+        trigger.setAttribute('aria-expanded', 'false');
+        search.value = '';
+        if (restoreFocus) trigger.focus();
+    };
+
+    const choose = (code) => {
+        if (!currencyCodes.includes(code)) return;
+        select.value = code;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        updateTrigger();
+        close(true);
+    };
+
+    const renderList = (query = '') => {
+        const normalizedQuery = query.trim().toLocaleLowerCase();
+        const matches = currencyDirectory.filter(item => {
+            if (!normalizedQuery) return true;
+            return `${item.code} ${item.name}`.toLocaleLowerCase().includes(normalizedQuery);
+        });
+        const popular = matches.filter(item => item.popular);
+        const all = matches.filter(item => !item.popular);
+        list.innerHTML = '';
+
+        const renderGroup = (label, items) => {
+            if (!items.length) return;
+            const heading = document.createElement('div');
+            heading.className = 'currency-picker-group-label';
+            heading.textContent = label;
+            list.appendChild(heading);
+            items.forEach(item => {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.className = 'currency-picker-option';
+                option.dataset.code = item.code;
+                option.setAttribute('role', 'option');
+                option.setAttribute('aria-selected', String(item.code === select.value));
+                option.innerHTML = `<span class="currency-picker-flag" style="background-image:url('${getCurrencyFlagUrl(item.code)}')" aria-hidden="true"></span><span class="currency-picker-option-code">${item.code}</span><span class="currency-picker-option-name">${item.name}</span><svg class="currency-picker-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m5 12 4 4L19 6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+                option.addEventListener('click', () => choose(item.code));
+                option.addEventListener('keydown', event => {
+                    const options = [...list.querySelectorAll('.currency-picker-option')];
+                    const index = options.indexOf(option);
+                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                        event.preventDefault();
+                        options[(index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length]?.focus();
+                    } else if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        choose(item.code);
+                    } else if (event.key === 'Escape') {
+                        event.preventDefault();
+                        close(true);
+                    }
+                });
+                list.appendChild(option);
+            });
+        };
+
+        if (!matches.length) {
+            const empty = document.createElement('div');
+            empty.className = 'currency-picker-empty';
+            empty.textContent = '未找到匹配货币';
+            list.appendChild(empty);
+            return;
+        }
+        if (!normalizedQuery) renderGroup('热门', popular);
+        renderGroup(normalizedQuery ? '搜索结果' : '所有货币', normalizedQuery ? matches : all);
+    };
+
+    const open = () => {
+        document.querySelectorAll('.currency-picker.is-open').forEach(openParent => {
+            if (openParent !== parent) openParent.querySelector('.currency-picker-trigger')?.click();
+        });
+        renderList();
+        panel.hidden = false;
+        const triggerRect = trigger.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - triggerRect.bottom;
+        parent.classList.toggle('opens-up', spaceBelow < 320 && triggerRect.top > spaceBelow);
+        parent.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+        window.requestAnimationFrame(() => search.focus());
+    };
+
+    trigger.addEventListener('click', () => panel.hidden ? open() : close());
+    trigger.addEventListener('keydown', event => {
+        if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            open();
+        } else if (event.key === 'Escape') {
+            close();
+        }
+    });
+    search.addEventListener('input', () => renderList(search.value));
+    search.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            close(true);
+        } else if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            list.querySelector('.currency-picker-option')?.focus();
+        } else if (event.key === 'Enter') {
+            const firstOption = list.querySelector('.currency-picker-option');
+            if (firstOption && list.querySelectorAll('.currency-picker-option').length === 1) choose(firstOption.dataset.code);
+        }
+    });
+    select.addEventListener('change', updateTrigger);
+    document.addEventListener('pointerdown', event => {
+        if (!parent.contains(event.target)) close();
+    });
+    select.currencyPickerRefresh = updateTrigger;
+    updateTrigger();
+}
+
+function swapConverterCurrencies() {
+    const from = converterEls.from.value;
+    converterEls.from.value = converterEls.to.value;
+    converterEls.to.value = from;
+    converterEls.from.currencyPickerRefresh?.();
+    converterEls.to.currencyPickerRefresh?.();
     updateCurrencyConverter();
 }
 
@@ -644,6 +899,7 @@ function loadInputsFromCookie() {
                 if(radio) radio.checked = true;
             }
             updateCurrencySymbol();
+            els.currency.currencyPickerRefresh?.();
         } catch(e) { console.error("Cookie parse error", e); }
     }
 }
@@ -794,7 +1050,7 @@ function formatDate(date) {
 
 function updateCurrencySymbol() {
     const code = els.currency.value;
-    const sym = currencySymbols[code] || code;
+    const sym = getCurrencySymbol(code);
     els.symbolDisplay.textContent = sym;
     // Dynamically adjust input left padding to prevent symbol/text overlap
     requestAnimationFrame(() => {
@@ -803,6 +1059,20 @@ function updateCurrencySymbol() {
         const neededPad = symRect.right - inputRect.left + 6;
         els.price.style.paddingLeft = Math.max(neededPad, 32) + 'px';
     });
+}
+
+function getCurrencySymbol(code) {
+    if (currencySymbols[code]) return currencySymbols[code];
+    try {
+        const symbol = new Intl.NumberFormat('zh-CN', {
+            style: 'currency',
+            currency: code,
+            currencyDisplay: 'narrowSymbol'
+        }).formatToParts(0).find(part => part.type === 'currency')?.value;
+        return symbol || code;
+    } catch (error) {
+        return code;
+    }
 }
 
 function calculate() {
