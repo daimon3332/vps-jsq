@@ -367,7 +367,8 @@ function createCurrencyPicker(select) {
 
     const updateTrigger = () => {
         const currency = currencyDirectory.find(item => item.code === select.value) || currencyDirectory[0];
-        trigger.innerHTML = `<span class="currency-picker-flag" style="background-image:url('${getCurrencyFlagUrl(currency.code)}')" aria-hidden="true"></span><span class="currency-picker-code">${currency.code}</span><span class="currency-picker-name">${currency.name}</span><svg class="currency-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+        trigger.innerHTML = `<span class="currency-picker-flag" aria-hidden="true"></span><span class="currency-picker-code">${currency.code}</span><span class="currency-picker-name">${currency.name}</span><svg class="currency-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+        trigger.querySelector('.currency-picker-flag').style.backgroundImage = `url("${getCurrencyFlagUrl(currency.code)}")`;
         trigger.setAttribute('aria-label', `${currency.code} ${currency.name}`);
     };
 
@@ -410,7 +411,8 @@ function createCurrencyPicker(select) {
                 option.dataset.code = item.code;
                 option.setAttribute('role', 'option');
                 option.setAttribute('aria-selected', String(item.code === select.value));
-                option.innerHTML = `<span class="currency-picker-flag" style="background-image:url('${getCurrencyFlagUrl(item.code)}')" aria-hidden="true"></span><span class="currency-picker-option-code">${item.code}</span><span class="currency-picker-option-name">${item.name}</span><svg class="currency-picker-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m5 12 4 4L19 6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+                option.innerHTML = `<span class="currency-picker-flag" aria-hidden="true"></span><span class="currency-picker-option-code">${item.code}</span><span class="currency-picker-option-name">${item.name}</span><svg class="currency-picker-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m5 12 4 4L19 6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+                option.querySelector('.currency-picker-flag').style.backgroundImage = `url("${getCurrencyFlagUrl(item.code)}")`;
                 option.addEventListener('click', () => choose(item.code));
                 option.addEventListener('keydown', event => {
                     const options = [...list.querySelectorAll('.currency-picker-option')];
